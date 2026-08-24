@@ -1,16 +1,18 @@
 # N+1 Query Problem
 
-> Halaman ini adalah pendalaman untuk topik N+1 Query Problem yang diperkenalkan di **[Pertemuan 7 — Eloquent Relationships](../pertemuan-07.md)**. Baca ini kalau penjelasan singkat di sana masih kurang mengena, atau kalau ingin analogi, studi kasus tambahan, dan cara mendeteksi N+1 di project nyata.
+<div style="text-align: justify;">
+
+> Halaman ini adalah pendalaman untuk topik N+1 Query Problem yang diperkenalkan di **[Pertemuan 7 - Eloquent Relationships](../pertemuan-07.md)**. Baca ini kalau penjelasan singkat di sana masih kurang mengena, atau kalau ingin analogi, studi kasus tambahan, dan cara mendeteksi N+1 di project nyata.
 
 ---
 
 ## Mengapa Ini Ada?
 
-Setiap kali aplikasi butuh data dari database, aplikasi harus "bertanya" ke database — ini disebut **query**. Semakin sering aplikasi bertanya (semakin banyak query), semakin lama waktu yang dibutuhkan untuk memuat halaman, karena setiap query butuh waktu tempuh (koneksi) ke database, bukan cuma waktu memproses datanya.
+Setiap kali aplikasi butuh data dari database, aplikasi harus "bertanya" ke database - ini disebut **query**. Semakin sering aplikasi bertanya (semakin banyak query), semakin lama waktu yang dibutuhkan untuk memuat halaman, karena setiap query butuh waktu tempuh (koneksi) ke database, bukan cuma waktu memproses datanya.
 
-Masalahnya, cara penulisan kode yang terlihat "biasa saja" — misalnya menampilkan data employee beserta nama departemennya di dalam sebuah `foreach` — bisa diam-diam membuat aplikasi bertanya ke database **berkali-kali lipat** tanpa disadari. Inilah yang disebut **N+1 Query Problem**, salah satu penyebab paling umum aplikasi Laravel terasa lambat saat datanya sudah banyak, meskipun terasa cepat-cepat saja saat masih development dengan data sedikit.
+Masalahnya, cara penulisan kode yang terlihat "biasa saja" - misalnya menampilkan data employee beserta nama departemennya di dalam sebuah `foreach` - bisa diam-diam membuat aplikasi bertanya ke database **berkali-kali lipat** tanpa disadari. Inilah yang disebut **N+1 Query Problem**, salah satu penyebab paling umum aplikasi Laravel terasa lambat saat datanya sudah banyak, meskipun terasa cepat-cepat saja saat masih development dengan data sedikit.
 
-Konsep ini penting dipahami karena bukan cuma soal Eloquent — masalah yang sama juga muncul di ORM framework lain seperti Sequelize (Node.js) atau Django ORM (Python).
+Konsep ini penting dipahami karena bukan cuma soal Eloquent - masalah yang sama juga muncul di ORM framework lain seperti Sequelize (Node.js) atau Django ORM (Python).
 
 ---
 
@@ -142,24 +144,24 @@ $employees->load('department');
 
 ## Cara Mendeteksi N+1 di Proyek
 
-1. **Laravel Debugbar** — package populer untuk melihat jumlah query yang dijalankan per halaman.
+1. **Laravel Debugbar** - package populer untuk melihat jumlah query yang dijalankan per halaman.
    ```bash
    composer require barryvdh/laravel-debugbar --dev
    ```
-2. **DB::listen()** — untuk logging query secara manual saat debugging.
+2. **DB::listen()** - untuk logging query secara manual saat debugging.
    ```php
    \DB::listen(function ($query) {
        \Log::info($query->sql, $query->bindings);
    });
    ```
-3. **Laravel Telescope** — tool resmi Laravel untuk monitoring query, job, dan request.
+3. **Laravel Telescope** - tool resmi Laravel untuk monitoring query, job, dan request.
 
 ---
 
 ## Contoh Perbandingan Lengkap
 
 ```php
-// BURUK — N+1 Problem
+// BURUK - N+1 Problem
 public function index()
 {
     $employees = Employee::paginate(10);
@@ -169,7 +171,7 @@ public function index()
     return view('employees.index', compact('employees'));
 }
 
-// BAIK — Eager Loading
+// BAIK - Eager Loading
 public function index()
 {
     $employees = Employee::with(['department', 'position'])
@@ -194,4 +196,6 @@ public function index()
 
 ---
 
-*Referensi lain: [Pertemuan 7 — Eloquent Relationships](../pertemuan-07.md) | [Daftar Isi Modul](../README.md)*
+</div>
+
+*Referensi lain: [Pertemuan 7 - Eloquent Relationships](../pertemuan-07.md) | [Daftar Isi Modul](../README.md)*

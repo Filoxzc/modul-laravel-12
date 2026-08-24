@@ -1,6 +1,8 @@
-# Git & GitHub — Dasar yang Perlu Diketahui
+# Git & GitHub - Dasar yang Perlu Diketahui
 
-> Materi tambahan, di luar urutan Pertemuan 1–11. Modul ini **mengasumsikan mahasiswa sudah bisa pakai Git** (branch `dev`/`main`, commit per checkpoint, push ke GitHub — lihat konvensi di setiap `pertemuan-XX.md`). Kalau belum pernah pakai Git sama sekali, baca ini dulu sebelum mulai Pertemuan 1.
+<div style="text-align: justify;">
+
+> Materi tambahan, di luar urutan Pertemuan 1–11. Modul ini **mengasumsikan mahasiswa sudah bisa pakai Git** (branch `dev`/`main`, commit per checkpoint, push ke GitHub - lihat konvensi di setiap `pertemuan-XX.md`). Kalau belum pernah pakai Git sama sekali, baca ini dulu sebelum mulai Pertemuan 1.
 
 ---
 
@@ -8,13 +10,13 @@
 
 Bayangkan mengerjakan `app-perpustakaan` tanpa Git. Setiap kali mau mencoba sesuatu yang berisiko, satu-satunya cara aman adalah copy-paste seluruh folder project jadi `app-perpustakaan-backup`, `app-perpustakaan-backup2`, `app-perpustakaan-final`, `app-perpustakaan-final-fix`, dan seterusnya. Kalau kerja tim, masalah lebih parah lagi: dua orang mengedit file yang sama, lalu bingung siapa yang menimpa pekerjaan siapa lewat email atau flashdisk.
 
-**Version control** (dan Git adalah implementasinya yang paling populer) menyelesaikan masalah ini dengan mencatat *riwayat perubahan* kode secara terstruktur — setiap perubahan direkam sebagai satu titik (disebut **commit**) yang bisa dilihat lagi, dibandingkan, atau bahkan dibatalkan kapan saja, tanpa perlu folder duplikat manual.
+**Version control** (dan Git adalah implementasinya yang paling populer) menyelesaikan masalah ini dengan mencatat *riwayat perubahan* kode secara terstruktur - setiap perubahan direkam sebagai satu titik (disebut **commit**) yang bisa dilihat lagi, dibandingkan, atau bahkan dibatalkan kapan saja, tanpa perlu folder duplikat manual.
 
-Konsep ini berlaku universal di luar Laravel — tim developer yang pakai Node.js, Python, atau Java pun tetap pakai Git untuk masalah yang sama persis: melacak riwayat perubahan kode dan mengoordinasikan kerja banyak orang di kode yang sama.
+Konsep ini berlaku universal di luar Laravel - tim developer yang pakai Node.js, Python, atau Java pun tetap pakai Git untuk masalah yang sama persis: melacak riwayat perubahan kode dan mengoordinasikan kerja banyak orang di kode yang sama.
 
 ---
 
-## Git vs GitHub — Dua Hal yang Berbeda
+## Git vs GitHub - Dua Hal yang Berbeda
 
 Ini sering tertukar oleh pemula:
 
@@ -25,7 +27,7 @@ Ini sering tertukar oleh pemula:
 | Fungsi utama | Mencatat riwayat perubahan (commit), branch, merge | Menyimpan salinan repository di server, kolaborasi, review kode (Pull Request) |
 | Analogi | Mesin ketik yang menyimpan setiap draft tulisanmu | Google Drive tempat draft-draft itu disimpan dan dibagikan |
 
-Bisa pakai Git **tanpa** GitHub (semua riwayat cuma tersimpan di laptop sendiri). Tapi tidak bisa pakai GitHub tanpa Git — GitHub cuma tempat menyimpan hasil kerja Git. Platform sejenis lain: GitLab, Bitbucket — konsep Git-nya identik, bedanya cuma platform hosting-nya.
+Bisa pakai Git **tanpa** GitHub (semua riwayat cuma tersimpan di laptop sendiri). Tapi tidak bisa pakai GitHub tanpa Git - GitHub cuma tempat menyimpan hasil kerja Git. Platform sejenis lain: GitLab, Bitbucket - konsep Git-nya identik, bedanya cuma platform hosting-nya.
 
 ---
 
@@ -38,10 +40,10 @@ Working Directory  --git add-->  Staging Area  --git commit-->  Local Repository
    (file yang kamu edit)          (file yang siap di-commit)     (riwayat commit di laptop)         (riwayat commit online)
 ```
 
-- **Working Directory** — folder project seperti biasa, file yang kamu edit di editor.
-- **Staging Area** — "ruang tunggu" berisi file yang sudah ditandai siap masuk commit berikutnya (lewat `git add`). Berguna kalau kamu mengedit 5 file tapi cuma ingin 3 di antaranya masuk 1 commit.
-- **Local Repository** — riwayat commit yang tersimpan di `.git/` folder, di laptop sendiri.
-- **Remote** — salinan repository yang tersimpan online (GitHub), supaya bisa diakses dari laptop lain atau dibagikan ke orang lain.
+- **Working Directory** - folder project seperti biasa, file yang kamu edit di editor.
+- **Staging Area** - "ruang tunggu" berisi file yang sudah ditandai siap masuk commit berikutnya (lewat `git add`). Berguna kalau kamu mengedit 5 file tapi cuma ingin 3 di antaranya masuk 1 commit.
+- **Local Repository** - riwayat commit yang tersimpan di `.git/` folder, di laptop sendiri.
+- **Remote** - salinan repository yang tersimpan online (GitHub), supaya bisa diakses dari laptop lain atau dibagikan ke orang lain.
 
 ---
 
@@ -54,7 +56,7 @@ git config --global user.name "Nama Kamu"
 git config --global user.email "email@kamu.com"
 ```
 
-Ini menentukan nama yang tercatat sebagai penulis commit — bukan login akun GitHub.
+Ini menentukan nama yang tercatat sebagai penulis commit - bukan login akun GitHub.
 
 ### Memulai Repository
 
@@ -73,7 +75,7 @@ git commit -m "[P-1] pesan singkat"   # simpan perubahan yang sudah ditandai seb
 git log --oneline               # lihat riwayat commit secara ringkas
 ```
 
-> **Kenapa harus `git add` dulu, tidak langsung `git commit`?** Supaya kamu bisa memilih mana yang masuk commit ini dan mana yang belum — misalnya kamu sedang mengerjakan 2 fitur sekaligus, tapi cuma 1 yang sudah selesai dan siap di-commit.
+> **Kenapa harus `git add` dulu, tidak langsung `git commit`?** Supaya kamu bisa memilih mana yang masuk commit ini dan mana yang belum - misalnya kamu sedang mengerjakan 2 fitur sekaligus, tapi cuma 1 yang sudah selesai dan siap di-commit.
 
 ### Bekerja dengan Remote (GitHub)
 
@@ -83,7 +85,7 @@ git push origin dev             # kirim commit dari branch dev di laptop ke GitH
 git pull origin dev             # ambil commit terbaru dari GitHub ke laptop (kebalikan dari push)
 ```
 
-### Branch — Bekerja di "Cabang" Terpisah
+### Branch - Bekerja di "Cabang" Terpisah
 
 **Branch** adalah cara mengembangkan sesuatu secara terpisah dari kode utama, tanpa mengganggu versi yang sudah stabil. Project `app-perpustakaan` di modul ini memakai 2 branch:
 
@@ -110,9 +112,9 @@ git diff --staged               # lihat detail baris yang sudah di-add, belum di
 
 ---
 
-## `.gitignore` — File yang Sengaja Tidak Ikut Di-commit
+## `.gitignore` - File yang Sengaja Tidak Ikut Di-commit
 
-Tidak semua file di project layak masuk Git. Contoh di project Laravel: folder `vendor/` (hasil `composer install`, bisa dibuat ulang), `node_modules/` (hasil `npm install`), dan `.env` (berisi password database — **jangan pernah commit file ini**, karena kalau repository publik, kredensial ikut ter-expose ke siapa saja).
+Tidak semua file di project layak masuk Git. Contoh di project Laravel: folder `vendor/` (hasil `composer install`, bisa dibuat ulang), `node_modules/` (hasil `npm install`), dan `.env` (berisi password database - **jangan pernah commit file ini**, karena kalau repository publik, kredensial ikut ter-expose ke siapa saja).
 
 File `.gitignore` mendaftar pola nama file/folder yang harus diabaikan Git:
 
@@ -122,7 +124,7 @@ File `.gitignore` mendaftar pola nama file/folder yang harus diabaikan Git:
 .env
 ```
 
-Laravel sudah menyediakan `.gitignore` default yang mencakup ini semua — biasanya tidak perlu diedit manual kecuali menambah file spesifik project.
+Laravel sudah menyediakan `.gitignore` default yang mencakup ini semua - biasanya tidak perlu diedit manual kecuali menambah file spesifik project.
 
 ---
 
@@ -136,7 +138,7 @@ git commit -m "update"
 git commit -m "fix bug"
 git commit -m "asdf"
 
-# Jelas — konvensi yang dipakai di modul ini
+# Jelas - konvensi yang dipakai di modul ini
 git commit -m "[P-5] migrasi semua tabel dan crud books categories selesai"
 git commit -m "[P-8] implementasi autentikasi login logout middleware"
 ```
@@ -147,11 +149,11 @@ Prinsipnya: pesan commit menjelaskan **apa** yang berubah, ditulis dalam bentuk 
 
 ## Kesalahan Umum Pemula
 
-- **Lupa `git add` sebelum commit** — muncul pesan "nothing to commit", padahal file sudah diedit. Cek dulu dengan `git status`.
-- **Commit terlalu besar** — mengerjakan 5 fitur sekaligus baru commit sekali dengan pesan "update banyak hal". Riwayat jadi tidak berguna karena tidak bisa dilacak per fitur. Biasakan commit kecil, sering, per bagian yang selesai (seperti pola checkpoint `[P-X]` di modul ini).
-- **Commit file `.env` atau `vendor/`** — cek `.gitignore` sebelum `git add .` pertama kali di project baru.
-- **Push ke branch yang salah** — pastikan branch aktif benar (`git branch` untuk cek tanda `*`) sebelum `git push`.
-- **Panik saat merge conflict** — ini normal terjadi kalau 2 orang (atau 2 branch) mengedit baris yang sama. Git akan menandai bagian yang bentrok di file, tinggal edit manual pilih versi mana yang benar, lalu `git add` dan `git commit` lagi.
+- **Lupa `git add` sebelum commit** - muncul pesan "nothing to commit", padahal file sudah diedit. Cek dulu dengan `git status`.
+- **Commit terlalu besar** - mengerjakan 5 fitur sekaligus baru commit sekali dengan pesan "update banyak hal". Riwayat jadi tidak berguna karena tidak bisa dilacak per fitur. Biasakan commit kecil, sering, per bagian yang selesai (seperti pola checkpoint `[P-X]` di modul ini).
+- **Commit file `.env` atau `vendor/`** - cek `.gitignore` sebelum `git add .` pertama kali di project baru.
+- **Push ke branch yang salah** - pastikan branch aktif benar (`git branch` untuk cek tanda `*`) sebelum `git push`.
+- **Panik saat merge conflict** - ini normal terjadi kalau 2 orang (atau 2 branch) mengedit baris yang sama. Git akan menandai bagian yang bentrok di file, tinggal edit manual pilih versi mana yang benar, lalu `git add` dan `git commit` lagi.
 
 ---
 
@@ -176,4 +178,6 @@ git push origin main
 
 ---
 
-*Referensi lain: [Pertemuan 1 — Framework, MVC & Setup Proyek](../pertemuan-01.md) | [Daftar Isi Modul](../README.md)*
+</div>
+
+*Referensi lain: [Pertemuan 1 - Framework, MVC & Setup Proyek](../pertemuan-01.md) | [Daftar Isi Modul](../README.md)*

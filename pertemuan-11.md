@@ -1,5 +1,7 @@
 # Pertemuan 11 — UAS
 
+<div style="text-align: justify;">
+
 > **Sebelumnya:** Pertemuan 1–10 membangun `app-perpustakaan` dari nol sampai lengkap — MVC & setup project, routing, controller & validasi, Blade & master layout, migration & CRUD nyata, UTS, Eloquent relationships, autentikasi & middleware, REST API, sampai konsumsi API di Dashboard/Laporan plus Seeder & Factory.
 > **Pertemuan ini:** Bukan pertemuan praktikum baru. Evaluasi akhir semester dalam bentuk **demo aplikasi live** dan tanya jawab konseptual — tidak ada kode baru yang dikerjakan di sesi ini.
 
@@ -197,5 +199,7 @@ Nilai akhir mata kuliah mengikuti kebijakan pembobotan UTS/UAS/tugas harian masi
 - Kalau repository tidak bisa diakses sama sekali (link mati, private tanpa akses) saat jadwal demo, Aspek 3 dan 5 (35% dari total) dinilai 0 — demo tetap dijalankan dari kode lokal mahasiswa untuk menilai Aspek 1, 2, dan 4.
 
 ---
+
+</div>
 
 *Navigasi: [← Pertemuan sebelumnya](./pertemuan-10.md) | [Daftar Isi](./README.md)*

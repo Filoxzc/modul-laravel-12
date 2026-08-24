@@ -47,8 +47,8 @@ Materi pendalaman di luar urutan Pertemuan 1–11 — boleh dibaca kapan saja se
 | Topik | Kapan Dibaca | Link |
 |---|---|---|
 | Git & GitHub — Dasar yang Perlu Diketahui | Sebelum Pertemuan 1, kalau belum pernah pakai Git sama sekali | [Buka](./tambahan/git-github-dasar.md) |
-| Glosarium — Daftar Istilah | Kapan saja, referensi cepat istilah lintas pertemuan | [Buka](./tambahan/glosarium.md) |
 | N+1 Query Problem (pendalaman) | Setelah Pertemuan 7, kalau penjelasan singkat di sana masih kurang jelas | [Buka](./tambahan/n-plus-1-query-problem.md) |
+| Glosarium — Daftar Istilah | Kapan saja, referensi cepat istilah lintas pertemuan | [Buka](./tambahan/glosarium.md) |
 
 ## Studi Kasus yang Digunakan
 

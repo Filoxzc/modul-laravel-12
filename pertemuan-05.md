@@ -1,7 +1,9 @@
-# Pertemuan 5 — Migration, Eloquent Model & CRUD
+# Pertemuan 5 - Migration, Eloquent Model & CRUD
 
-> **Sebelumnya:** `BookController` dan `CategoryController` sudah berisi logika nyata (validasi, redirect, flash message), tapi datanya masih array statis `private array $books` yang hidup dan mati bersama request — tidak pernah benar-benar tersimpan.
-> **Pertemuan ini:** Array dummy digantikan tabel database sungguhan lewat Migration, dan diakses lewat Eloquent Model — sehingga data buku dan kategori yang ditambahkan hari ini masih ada besok.
+<div style="text-align: justify;">
+
+> **Sebelumnya:** `BookController` dan `CategoryController` sudah berisi logika nyata (validasi, redirect, flash message), tapi datanya masih array statis `private array $books` yang hidup dan mati bersama request - tidak pernah benar-benar tersimpan.
+> **Pertemuan ini:** Array dummy digantikan tabel database sungguhan lewat Migration, dan diakses lewat Eloquent Model - sehingga data buku dan kategori yang ditambahkan hari ini masih ada besok.
 
 ---
 
@@ -17,15 +19,15 @@ Setelah menyelesaikan pertemuan ini, mahasiswa mampu:
 
 ## Konsep: Mengapa Migration & ORM Ada?
 
-Sampai Pertemuan 4, data buku dan kategori hidup sebagai array PHP yang dideklarasikan langsung di dalam Controller. Ini bekerja untuk keperluan belajar, tapi punya masalah fundamental: array itu **dibuat ulang dari nol setiap kali PHP menerima request baru**. Tambah satu buku lewat form, redirect ke halaman index, dan buku itu sudah hilang — karena proses PHP yang menangani request `POST /books` sudah selesai dan memori yang menyimpan array itu sudah dibuang, sementara proses baru yang menangani `GET /books` mulai dari array awal yang sama persis. Solusi paling dasar untuk masalah ini adalah database: sesuatu yang hidup di luar siklus hidup satu request, sehingga data yang ditulis oleh satu proses bisa dibaca oleh proses lain kapan saja. Tapi begitu database masuk ke gambaran, muncul dua masalah baru yang justru menjadi topik utama pertemuan ini.
+Sampai Pertemuan 4, data buku dan kategori berada dalam bentuk array PHP yang dideklarasikan langsung di dalam Controller. Ini bekerja untuk keperluan belajar, tapi punya masalah fundamental: array itu **dibuat ulang dari nol setiap kali PHP menerima request baru**. Tambah satu buku lewat form, redirect ke halaman index, dan buku itu sudah hilang - karena proses PHP yang menangani request `POST /books` sudah selesai dan memori yang menyimpan array itu sudah dihapus, sementara proses baru yang menangani `GET /books` mulai dari array awal yang sama persis. Solusi paling dasar untuk masalah ini adalah database: sesuatu yang hidup di luar siklus hidup satu request, sehingga data yang ditulis oleh satu proses bisa dibaca oleh proses lain kapan saja. Tapi begitu database masuk, muncul dua masalah baru yang menjadi topik utama pertemuan ini.
 
-Masalah pertama adalah **konsistensi struktur database antar developer dan antar environment**. Bayangkan sebuah tim berisi tiga mahasiswa mengerjakan project yang sama. Tanpa alat bantu, cara paling umum menyamakan struktur tabel adalah mengirim file `.sql` lewat chat, atau — lebih buruk — saling mengingatkan secara lisan "eh jangan lupa tabel `books` sekarang ada kolom `sampul` ya". Cara ini gagal dalam skala kecil sekalipun: satu orang lupa menjalankan `ALTER TABLE`, aplikasinya di laptop dia mendadak error `Unknown column 'sampul'`, dan butuh waktu untuk sadar penyebabnya cuma database yang tertinggal. Migration menyelesaikan ini dengan mengubah struktur schema jadi **kode yang di-commit ke Git**, persis seperti kode aplikasi lainnya. Setiap perubahan struktur — tabel baru, kolom baru, index baru — ditulis sebagai file PHP kecil yang bisa dijalankan (`up()`) atau dibatalkan (`down()`). Siapa pun yang `git pull` lalu menjalankan `php artisan migrate` otomatis punya struktur database yang identik, tanpa perlu koordinasi manual. Ini bukan konsep unik Laravel: Django punya `makemigrations`/`migrate`, Rails (Ruby) adalah framework yang mempopulerkan istilah "migration" untuk kasus ini, dan Express.js biasanya memakai library terpisah seperti Knex atau Sequelize untuk hal yang sama. Semua menyelesaikan masalah identik — schema database ikut ter-*version-control* seperti halnya kode.
+Masalah pertama adalah **konsistensi struktur database antar developer dan antar environment**. Bayangkan sebuah tim berisi tiga mahasiswa mengerjakan project yang sama. Tanpa alat bantu, cara paling umum menyamakan struktur tabel adalah mengirim file `.sql` lewat chat, atau saling mengingatkan secara lisan "eh jangan lupa tabel `books` sekarang ada kolom `sampul` ya". Cara ini gagal dalam skala kecil sekalipun: satu orang lupa menjalankan `ALTER TABLE`, aplikasinya di laptop dia mendadak error `Unknown column 'sampul'`, dan butuh waktu untuk sadar penyebabnya cuma database yang tertinggal. Migration menyelesaikan ini dengan mengubah struktur schema jadi **kode yang di-commit ke Git**, persis seperti kode aplikasi lainnya. Setiap perubahan struktur tabel baru, kolom baru, atau index baru akan ditulis sebagai file PHP kecil yang bisa dijalankan (`up()`) atau dibatalkan (`down()`). Siapa pun yang `git pull` lalu menjalankan `php artisan migrate` otomatis punya struktur database yang identik, tanpa perlu koordinasi manual. Ini bukan konsep unik Laravel: Django punya `makemigrations`/`migrate`, Rails (Ruby) adalah framework yang mempopulerkan istilah "migration" untuk kasus ini, dan Express.js biasanya memakai library terpisah seperti Knex atau Sequelize untuk hal yang sama. Semua menyelesaikan masalah identik - schema database ikut ter-*version-control* seperti halnya kode.
 
-Masalah kedua adalah **jarak konseptual antara tabel relasional dan objek dalam kode**. Database menyimpan data sebagai baris dan kolom; PHP (dan hampir semua bahasa pemrograman modern) bekerja dengan objek dan array asosiatif. Menjembatani dua dunia ini secara manual berarti menulis SQL mentah di mana-mana: `SELECT * FROM books WHERE id = ?`, memetakan hasilnya satu per satu ke variabel, lalu mengulang proses serupa untuk `INSERT`, `UPDATE`, `DELETE` — belum terhitung risiko *SQL Injection* kalau input user ditempel langsung ke string query tanpa parameter binding. **ORM (Object-Relational Mapping)** menyelesaikan ini dengan memetakan satu tabel ke satu class, dan satu baris data ke satu instance object dari class itu. Query yang tadinya SQL mentah berubah jadi pemanggilan method PHP biasa: `Book::find(1)`, `Book::create([...])`. Laravel memakai pendekatan ORM bernama **Active Record**, di mana object model itu sendiri tahu cara menyimpan dan mengambil dirinya dari database (`$book->save()`). Ini beda dengan pola **Data Mapper** yang dipakai misalnya oleh Doctrine (populer di ekosistem Symfony/PHP) atau Entity Framework (.NET), di mana object model murni menyimpan data sementara logika penyimpanan dipisah ke class "mapper" terpisah. Kedua pendekatan sama-sama valid; Active Record dipilih Laravel karena lebih ringkas untuk ditulis, meski Data Mapper dianggap lebih murni secara desain untuk aplikasi enterprise yang sangat besar.
+Masalah kedua adalah **jarak konseptual antara tabel relasional dan objek dalam kode**. Database menyimpan data sebagai baris dan kolom; PHP (dan hampir semua bahasa pemrograman modern) bekerja dengan objek dan array asosiatif. Menjembatani dua dunia ini secara manual berarti menulis SQL mentah di mana-mana: `SELECT * FROM books WHERE id = ?`, memetakan hasilnya satu per satu ke variabel, lalu mengulang proses serupa untuk `INSERT`, `UPDATE`, `DELETE` - belum terhitung risiko *SQL Injection* kalau input user ditempel langsung ke string query tanpa parameter binding. **ORM (Object-Relational Mapping)** menyelesaikan ini dengan memetakan satu tabel ke satu class, dan satu baris data ke satu instance object dari class itu. Query yang tadinya SQL mentah berubah jadi pemanggilan method PHP biasa: `Book::find(1)`, `Book::create([...])`. Laravel memakai pendekatan ORM bernama **Active Record**, di mana object model itu sendiri tahu cara menyimpan dan mengambil dirinya dari database (`$book->save()`). Ini beda dengan pola **Data Mapper** yang dipakai misalnya oleh Doctrine (populer di ekosistem Symfony/PHP) atau Entity Framework (.NET), di mana object model murni menyimpan data sementara logika penyimpanan dipisah ke class "mapper" terpisah. Kedua pendekatan sama-sama valid; Active Record dipilih Laravel karena lebih ringkas untuk ditulis, meski Data Mapper dianggap lebih murni secara desain untuk aplikasi enterprise yang sangat besar.
 
-Konsep ORM juga bukan monopoli Laravel. Django (Python) punya ORM bawaan yang filosofinya nyaris identik dengan Eloquent — `Book.objects.get(id=1)` di Django setara dengan `Book::find(1)` di Eloquent. Node.js punya beberapa pilihan populer seperti Prisma atau Sequelize. Spring Boot (Java) memakai Hibernate/JPA, yang secara historis justru menjadi salah satu inspirasi awal konsep ORM modern. Yang membedakan tiap implementasi biasanya soal seberapa "ajaib" ORM itu bekerja di belakang layar, dan seberapa mudah developer bisa "keluar" dari ORM dan menulis query manual kalau kebutuhannya sudah terlalu kompleks untuk direpresentasikan lewat method-method bawaan. Laravel sengaja dirancang supaya Eloquent tidak menjadi kotak tertutup: di baliknya ada **Query Builder** yang bisa dipanggil kapan saja untuk kasus yang lebih rumit, dan di balik Query Builder itu masih ada PDO — lapisan akses database PHP paling dasar. Jadi belajar Eloquent bukan belajar sesuatu yang eksklusif dan terpisah, melainkan belajar lapisan kenyamanan paling atas dari tumpukan yang bisa ditelusuri sampai ke SQL mentah kapan pun dibutuhkan.
+Konsep ORM juga bukan hanya ada pada Laravel. Django (Python) punya ORM bawaan yang filosofinya nyaris identik dengan Eloquent - `Book.objects.get(id=1)` di Django setara dengan `Book::find(1)` di Eloquent. Node.js punya beberapa pilihan populer seperti Prisma atau Sequelize. Spring Boot (Java) memakai Hibernate/JPA, yang secara historis justru menjadi salah satu inspirasi awal konsep ORM modern. Yang membedakan tiap implementasi biasanya soal seberapa "ajaib" ORM itu bekerja di belakang layar, dan seberapa mudah developer bisa "keluar" dari ORM dan menulis query manual kalau kebutuhannya sudah terlalu kompleks untuk direpresentasikan lewat method-method bawaan. Laravel sengaja dirancang supaya Eloquent tidak menjadi sistem tertutup: di baliknya ada **Query Builder** yang bisa dipanggil kapan saja untuk kasus yang lebih rumit, dan di balik Query Builder itu masih ada PDO - lapisan akses database PHP paling dasar. Jadi belajar Eloquent bukan belajar sesuatu yang eksklusif dan terpisah, melainkan belajar lapisan kenyamanan paling atas dari tumpukan yang bisa ditelusuri sampai ke SQL mentah kapan pun dibutuhkan.
 
-Ada satu prinsip keamanan penting yang datang gratis begitu pindah dari array dummy ke Eloquent: **mass assignment protection**. Kalau seorang developer ceroboh menulis `Book::create($request->all())` tanpa berpikir panjang, dan form HTML-nya (atau permintaan API yang dipalsukan) menyertakan field tersembunyi seperti `role=admin` atau `id=999`, tanpa perlindungan apa pun database bisa saja menerima nilai itu mentah-mentah — celah yang dikenal sebagai *mass assignment vulnerability*. Eloquent menutup celah ini lewat properti `$fillable`: daftar putih (*whitelist*) kolom yang boleh diisi lewat `create()` atau `update()` massal. Kolom apa pun di luar daftar itu otomatis diabaikan Eloquent, bukan error, hanya diam-diam tidak disimpan. Alternatifnya adalah `$guarded` — daftar hitam (*blacklist*) kolom yang **tidak** boleh diisi massal, dengan semua kolom lain otomatis diizinkan. Pertemuan ini konsisten memakai `$fillable` karena sifatnya "aman secara default": kolom baru yang lupa didaftarkan otomatis tertolak, bukan otomatis diterima.
+Ada satu prinsip keamanan penting begitu pindah dari array dummy ke Eloquent: **mass assignment protection**. Kalau seorang developer ceroboh menulis `Book::create($request->all())` tanpa berpikir panjang, dan form HTML-nya (atau permintaan API yang dipalsukan) menyertakan field tersembunyi seperti `role=admin` atau `id=999`, tanpa perlindungan apa pun database bisa saja menerima nilai itu mentah-mentah - celah yang dikenal sebagai *mass assignment vulnerability*. Eloquent menutup celah ini lewat properti `$fillable`: daftar putih (*whitelist*) kolom yang boleh diisi lewat `create()` atau `update()` massal. Kolom apa pun di luar daftar itu otomatis diabaikan Eloquent, bukan error, hanya diam-diam tidak disimpan. Alternatifnya adalah `$guarded` - daftar hitam (*blacklist*) kolom yang **tidak** boleh diisi massal, dengan semua kolom lain otomatis diizinkan. Pertemuan ini konsisten memakai `$fillable` karena sifatnya "aman secara default": kolom baru yang lupa didaftarkan otomatis tertolak, bukan otomatis diterima.
 
 ---
 
@@ -42,18 +44,18 @@ php artisan migrate:rollback                    # membatalkan batch migration te
 php artisan migrate:status                      # melihat migration mana yang sudah/belum jalan
 ```
 
-`migrate:rollback` bekerja dengan memanggil method `down()` di file migration — makanya method itu penting ditulis dengan benar (biasanya `Schema::dropIfExists()`), bukan sekadar dibiarkan kosong. Ada juga `php artisan migrate:fresh`, yang **menghapus semua tabel** lalu menjalankan ulang seluruh migration dari nol — sangat berguna saat development ketika struktur tabel masih sering berubah dan data di dalamnya belum penting untuk dipertahankan, tapi **jangan pernah dijalankan di database production** karena sifatnya destruktif total.
+`migrate:rollback` bekerja dengan memanggil method `down()` di file migration - makanya method itu penting ditulis dengan benar (biasanya `Schema::dropIfExists()`), bukan sekadar dibiarkan kosong. Ada juga `php artisan migrate:fresh`, yang **menghapus semua tabel** lalu menjalankan ulang seluruh migration dari nol - sangat berguna saat development ketika struktur tabel masih sering berubah dan data di dalamnya belum penting untuk dipertahankan, tapi **jangan pernah dijalankan di database production** karena sifatnya destruktif total.
 
 ### Urutan Migration: Parent Harus Ada Duluan
 
-Tabel yang punya foreign key hanya bisa dibuat **setelah** tabel yang dirujuknya sudah ada. `books` merujuk `categories` lewat `category_id`, jadi migration `categories` harus dieksekusi lebih dulu. Laravel menentukan urutan eksekusi migration murni dari **nama file**, yang diawali timestamp otomatis saat file dibuat (`2026_07_16_012106_create_categories_table.php`). Kalau dua file dibuat dalam detik yang sama persis — misalnya lewat dua perintah `make:migration` yang dijalankan berurutan sangat cepat — timestamp keduanya bisa identik, dan Laravel jatuh ke urutan alfabetis sebagai *tie-breaker*. Ini persis yang terjadi saat migration `create_loans_table` dan `create_members_table` dibuat di praktikum ini: keduanya kebetulan mendapat timestamp yang sama, dan karena "loans" < "members" secara alfabet, Laravel mencoba membuat tabel `loans` (yang butuh `member_id` merujuk ke `members`) **sebelum** tabel `members` sendiri ada — migration gagal dengan error *"Foreign key constraint is incorrectly formed"*. Solusinya sederhana: ganti nama file supaya timestamp `members` lebih kecil dari `loans`. Ini bukan kesalahan langka; siapa pun yang membuat beberapa migration dengan foreign key saling terkait dalam waktu berdekatan berpotensi mengalami hal yang sama, jadi selalu periksa urutan file di `database/migrations/` setelah membuat beberapa migration sekaligus.
+Tabel yang punya foreign key hanya bisa dibuat **setelah** tabel yang dirujuknya sudah ada. `books` merujuk `categories` lewat `category_id`, jadi migration `categories` harus dieksekusi lebih dulu. Laravel menentukan urutan eksekusi migration murni dari **nama file**, yang diawali timestamp otomatis saat file dibuat (`2026_07_16_012106_create_categories_table.php`). Kalau dua file dibuat dalam detik yang sama persis - misalnya lewat dua perintah `make:migration` yang dijalankan berurutan sangat cepat - timestamp keduanya bisa identik, dan Laravel jatuh ke urutan alfabetis sebagai *tie-breaker*. Ini persis yang terjadi saat migration `create_loans_table` dan `create_members_table` dibuat di praktikum ini: keduanya kebetulan mendapat timestamp yang sama, dan karena "loans" < "members" secara alfabet, Laravel mencoba membuat tabel `loans` (yang butuh `member_id` merujuk ke `members`) **sebelum** tabel `members` sendiri ada - migration gagal dengan error *"Foreign key constraint is incorrectly formed"*. Solusinya sederhana: ganti nama file supaya timestamp `members` lebih kecil dari `loans`. Ini bukan kesalahan langka; siapa pun yang membuat beberapa migration dengan foreign key saling terkait dalam waktu berdekatan berpotensi mengalami hal yang sama, jadi selalu periksa urutan file di `database/migrations/` setelah membuat beberapa migration sekaligus.
 
 ### Tipe Kolom Blueprint
 
 `Schema::create()` menerima closure berisi objek `Blueprint`, yang menyediakan method untuk tiap tipe kolom:
 
 ```php
-// Contoh ilustrasi konsep — bukan langkah praktikum
+// Contoh ilustrasi konsep - bukan langkah praktikum
 Schema::create('books', function (Blueprint $table) {
     $table->id();                                     // BIGINT UNSIGNED, primary key, auto increment
     $table->string('judul', 200);                     // VARCHAR(200)
@@ -93,14 +95,14 @@ class Book extends Model
 }
 ```
 
-Dengan `$fillable` terisi seperti ini, `Book::create($request->validated())` hanya akan menyimpan kolom yang namanya ada di daftar itu — meskipun `$request->validated()` kebetulan berisi key lain, key itu diam-diam diabaikan, bukan disimpan atau memicu error.
+Dengan `$fillable` terisi seperti ini, `Book::create($request->validated())` hanya akan menyimpan kolom yang namanya ada di daftar itu - meskipun `$request->validated()` kebetulan berisi key lain, key itu akan diabaikan, bukan disimpan atau memicu error.
 
 ### CRUD Dasar Eloquent
 
 Lima method ini menutupi hampir seluruh kebutuhan query di pertemuan ini:
 
 ```php
-// Contoh ilustrasi konsep — bukan langkah praktikum
+// Contoh ilustrasi konsep - bukan langkah praktikum
 Book::all();                          // ambil semua baris, kembalikan Collection
 Book::find(1);                        // ambil satu baris berdasar primary key, null kalau tidak ada
 Book::findOrFail(1);                  // sama seperti find(), tapi lempar 404 otomatis kalau tidak ada
@@ -110,14 +112,14 @@ $book->update(['stok' => 10]);        // UPDATE baris ini saja
 $book->delete();                      // DELETE baris ini saja
 ```
 
-`findOrFail()` dipakai konsisten di praktikum ini untuk method `show`, `edit`, `update`, dan `destroy` — dibanding `find()` biasa yang mengembalikan `null` diam-diam kalau ID tidak ditemukan (dan berpotensi memicu error samar di baris berikutnya saat `null` itu dipakai seakan-akan objek Model), `findOrFail()` langsung menghentikan request dengan halaman 404 standar Laravel, jauh lebih mudah dilacak penyebabnya.
+`findOrFail()` dipakai konsisten di praktikum ini untuk method `show`, `edit`, `update`, dan `destroy` - dibanding `find()` biasa yang mengembalikan `null` diam-diam kalau ID tidak ditemukan (dan berpotensi memicu error samar di baris berikutnya saat `null` itu dipakai seakan-akan objek Model), `findOrFail()` langsung menghentikan request dengan halaman 404 standar Laravel, jauh lebih mudah dilacak penyebabnya.
 
 ### Pagination
 
-Mengganti `Book::all()` dengan `Book::paginate(10)` sudah cukup untuk mendapatkan 10 data per halaman lengkap dengan metadata halaman (halaman saat ini, total halaman, dst) — Eloquent otomatis membaca parameter `?page=` dari URL:
+Mengganti `Book::all()` dengan `Book::paginate(10)` sudah cukup untuk mendapatkan 10 data per halaman lengkap dengan metadata halaman (halaman saat ini, total halaman, dst) - Eloquent otomatis membaca parameter `?page=` dari URL:
 
 ```php
-// Contoh ilustrasi konsep — bukan langkah praktikum
+// Contoh ilustrasi konsep - bukan langkah praktikum
 public function index()
 {
     $books = Book::paginate(10);
@@ -133,11 +135,11 @@ Karena `LengthAwarePaginator` yang dikembalikan `paginate()` tetap bisa di-loop 
 {{ $books->links() }}
 ```
 
-`links()` merender navigasi halaman (nomor halaman, tombol sebelumnya/berikutnya) memakai style Tailwind CSS secara default — tetap tampil sebagai HTML biasa meskipun project ini tidak memakai Tailwind, hanya saja tanpa styling visual khusus.
+`links()` merender navigasi halaman (nomor halaman, tombol sebelumnya/berikutnya) memakai style Tailwind CSS secara default - tetap tampil sebagai HTML biasa meskipun project ini tidak memakai Tailwind, hanya saja tanpa styling visual khusus.
 
 ### Eloquent vs Query Builder: Kapan Pakai yang Mana?
 
-Eloquent (`Book::where(...)`) sebenarnya lapisan tipis di atas **Query Builder** (`DB::table('books')->where(...)`) — keduanya menghasilkan SQL yang mirip, bedanya Eloquent mengembalikan instance Model (punya akses ke `$fillable`, dan nantinya di Pertemuan 7, relationship), sedangkan Query Builder mengembalikan `stdClass` polos yang lebih ringan tapi tidak punya fitur tambahan itu. Aturan praktis paling umum: pakai Eloquent selama masih berurusan dengan satu baris yang punya identitas jelas (butuh disimpan, diupdate, dihapus, atau punya relasi ke tabel lain) — yang mencakup hampir seluruh kebutuhan CRUD di project ini. Pindah ke Query Builder murni biasanya baru masuk akal untuk query agregat berat yang lintas banyak tabel dan tidak butuh representasi sebagai objek, misalnya laporan statistik gabungan — bukan kebutuhan pertemuan ini, tapi baik untuk diketahui batasannya sejak awal.
+Eloquent (`Book::where(...)`) sebenarnya lapisan tipis di atas **Query Builder** (`DB::table('books')->where(...)`) - keduanya menghasilkan SQL yang serupa, bedanya Eloquent mengembalikan instance Model (punya akses ke `$fillable`, dan nantinya di Pertemuan 7, relationship), sedangkan Query Builder mengembalikan `stdClass` sederhana yang lebih ringan tapi tidak punya fitur tambahan itu. Aturan praktis paling umum: pakai Eloquent selama masih berurusan dengan satu baris yang punya identitas jelas (butuh disimpan, diupdate, dihapus, atau punya relasi ke tabel lain) - yang mencakup hampir seluruh kebutuhan CRUD di project ini. Pindah ke Query Builder baru masuk akal untuk query agregat berat yang lintas banyak tabel dan tidak butuh representasi sebagai objek, misalnya laporan statistik gabungan.
 
 ---
 
@@ -148,7 +150,7 @@ Eloquent (`Book::where(...)`) sebenarnya lapisan tipis di atas **Query Builder**
 > Di akhir praktikum ini kamu akan memiliki: enam tabel di database (`users` dengan kolom `role` tambahan, `categories`, `books`, `members`, `loans`, `loan_items`), lima Model Eloquent dengan `$fillable` lengkap, serta CRUD `books` dan `categories` yang sepenuhnya memakai data nyata dari database (bukan array lagi).
 > Kalau butuh lihat lagi desain lengkap keenam tabel beserta relasinya sebelum mulai, buka **[Studi Kasus & Desain Database](./studi-kasus-database.md)**.
 
-### Langkah 1 — Menambahkan Kolom `role` ke Migration `users`
+### Langkah 1 - Menambahkan Kolom `role` ke Migration `users`
 
 Tabel `users` bawaan Laravel belum punya kolom `role` yang dibutuhkan desain database project ini. Karena migration ini belum pernah dijalankan di database manapun, kolom itu ditambahkan langsung ke file migration bawaan, bukan lewat migration baru terpisah.
 
@@ -166,9 +168,9 @@ Schema::create('users', function (Blueprint $table) {
 });
 ```
 
-> Kalau migration ini **sudah pernah** dijalankan sebelumnya (ada baris di tabel `migrations`), menambahkan kolom harus lewat migration baru (`php artisan make:migration add_role_to_users_table`) yang memakai `Schema::table()` alih-alih `Schema::create()` — mengedit migration lama yang sudah jalan tidak akan mengubah database yang sudah ada.
+> Kalau migration ini **sudah pernah** dijalankan sebelumnya (ada baris di tabel `migrations`), menambahkan kolom harus lewat migration baru (`php artisan make:migration add_role_to_users_table`) yang memakai `Schema::table()` bukan `Schema::create()` karena mengedit migration lama yang sudah jalan tidak akan mengubah database yang sudah ada.
 
-Kolom baru di database saja belum cukup — Model `User` juga perlu tahu kolom `role` boleh diisi lewat mass assignment, kalau tidak, `User::create([...'role' => ...])` yang nanti dipakai `UserSeeder` di Pertemuan 8 akan diam-diam mengabaikan field itu. Tambahkan `'role'` ke `$fillable` di `User.php` sekarang juga:
+Kolom baru di database saja belum cukup - Model `User` juga perlu tahu kolom `role` boleh diisi lewat mass assignment, kalau tidak, `User::create([...'role' => ...])` yang nanti dipakai `UserSeeder` di Pertemuan 8 akan diam-diam mengabaikan field itu. Tambahkan `'role'` ke `$fillable` di `User.php` sekarang juga:
 
 ```php
 // File: app/Models/User.php
@@ -180,7 +182,7 @@ protected $fillable = [
 ];
 ```
 
-### Langkah 2 — Membuat Migration Lima Tabel Lainnya
+### Langkah 2 - Membuat Migration Lima Tabel Lainnya
 
 Setiap tabel dibuat lewat `make:migration`, dengan urutan pembuatan mengikuti urutan dependency: `categories` dan `books` (yang merujuknya) duluan, baru `members`, `loans`, dan `loan_items`.
 
@@ -258,10 +260,10 @@ Schema::create('loan_items', function (Blueprint $table) {
 });
 ```
 
-> ⚠️ **Periksa urutan file** di `database/migrations/` sebelum lanjut — kalau lima perintah `make:migration` di atas dijalankan sekaligus lewat copy-paste, `create_members_table` dan `create_loans_table` berpotensi besar dapat timestamp identik. Buka folder `database/migrations/`, dan kalau nama file `..._create_loans_table.php` muncul **sebelum** `..._create_members_table.php` (padahal `loans` butuh `members` sudah ada duluan), rename salah satunya dengan menambah satu huruf di akhir timestamp supaya urutannya benar:
+> ⚠️ **Periksa urutan file** di `database/migrations/` sebelum lanjut - kalau lima perintah `make:migration` di atas dijalankan sekaligus lewat copy-paste, `create_members_table` dan `create_loans_table` berpotensi besar dapat timestamp identik. Buka folder `database/migrations/`, dan kalau nama file `..._create_loans_table.php` muncul **sebelum** `..._create_members_table.php` (padahal `loans` butuh `members` sudah ada duluan), rename salah satunya dengan menambah satu huruf di akhir timestamp supaya urutannya benar:
 >
 > ```
-> # Sebelum (timestamp identik, urutan salah — loans duluan padahal butuh members):
+> # Sebelum (timestamp identik, urutan salah - loans duluan padahal butuh members):
 > 2026_07_16_012108_create_loans_table.php
 > 2026_07_16_012108_create_members_table.php
 >
@@ -270,7 +272,7 @@ Schema::create('loan_items', function (Blueprint $table) {
 > 2026_07_16_012108b_create_loans_table.php
 > ```
 >
-> Laravel mengurutkan migration murni dari nama file secara alfabetis, jadi menambah huruf di akhir angka timestamp itu valid dan tidak merusak apa pun — cukup rename filenya (klik kanan → rename di file explorer, atau `mv` di terminal), isi filenya tidak perlu diubah. Lihat penjelasan lengkap kenapa ini bisa terjadi di bagian Materi.
+> Laravel mengurutkan migration murni dari nama file secara alfabetis, jadi menambah huruf di akhir angka timestamp itu valid dan tidak merusak apa pun - cukup rename filenya (klik kanan → rename di file explorer, atau `mv` di terminal), isi filenya tidak perlu diubah. Lihat penjelasan lengkap kenapa ini bisa terjadi di bagian Materi.
 
 Jalankan migration, lalu verifikasi semua tabel terbuat tanpa error:
 
@@ -280,7 +282,7 @@ php artisan migrate
 
 > 📸 *Screenshot: output terminal menampilkan enam baris migration dengan status `DONE`, tanpa ada yang `FAIL`.*
 
-### Langkah 3 — Membuat Model Eloquent
+### Langkah 3 - Membuat Model Eloquent
 
 ```bash
 php artisan make:model Category
@@ -342,11 +344,11 @@ class LoanItem extends Model
 }
 ```
 
-Method dan relasi (`hasMany`, `belongsTo`) sengaja **belum ditambahkan** ke Model manapun di pertemuan ini — itu topik utama Pertemuan 7, setelah CRUD dasar benar-benar dikuasai dulu.
+Method dan relasi (`hasMany`, `belongsTo`) sengaja **belum ditambahkan** ke Model manapun di pertemuan ini - itu topik utama Pertemuan 7, setelah CRUD dasar benar-benar dikuasai dulu.
 
-### Langkah 4 — Mengganti Data Dummy `CategoryController` dengan Eloquent
+### Langkah 4 - Mengganti Data Dummy `CategoryController` dengan Eloquent
 
-Seluruh array `private array $categories` dihapus. Setiap method sekarang memanggil Model `Category` langsung, dan `edit`/`update`/`destroy` yang sebelumnya cuma stub string kini diisi logika sungguhan:
+Seluruh array `private array $categories` dihapus. Setiap method sekarang memanggil Model `Category` langsung, dan `edit`/`update`/`destroy` yang sebelumnya cuma kerangka kosong string kini diisi logika sungguhan:
 
 ```php
 // File: app/Http/Controllers/CategoryController.php
@@ -401,14 +403,14 @@ public function destroy(string $id)
 }
 ```
 
-Karena Eloquent Model mengimplementasikan `ArrayAccess`, sintaks `$category['nama_kategori']` yang sudah dipakai di `categories/index.blade.php` dan `categories/create.blade.php` sejak Pertemuan 3-4 **tetap berfungsi tanpa perlu diubah** — meski sekarang `$category` adalah instance Model, bukan array asosiatif lagi. Yang perlu ditambahkan hanya `categories/edit.blade.php` (belum pernah dibuat sebelumnya karena `edit()` masih stub) dan satu baris `{{ $categories->links() }}` di `categories/index.blade.php` untuk menampilkan navigasi pagination — **hapus** paragraf catatan lama ("data di atas masih data dummy...") di bagian bawah tabel, ganti persis dengan baris `links()` ini:
+Karena Eloquent Model mengimplementasikan `ArrayAccess`, sintaks `$category['nama_kategori']` yang sudah dipakai di `categories/index.blade.php` dan `categories/create.blade.php` sejak Pertemuan 3-4 **tetap berfungsi tanpa perlu diubah** - meski sekarang `$category` adalah instance Model, bukan array asosiatif lagi. Yang perlu ditambahkan hanya `categories/edit.blade.php` (belum pernah dibuat sebelumnya karena `edit()` masih kerangka kosong) dan satu baris `{{ $categories->links() }}` di `categories/index.blade.php` untuk menampilkan navigasi pagination - **hapus** paragraf catatan lama ("data di atas masih data dummy...") di bagian bawah tabel, ganti persis dengan baris `links()` ini:
 
 ```blade
 {{-- File: resources/views/categories/index.blade.php (ganti paragraf "Catatan: data dummy..." di akhir file dengan ini) --}}
 {{ $categories->links() }}
 ```
 
-File ini baru, belum pernah ada sebelumnya — tulis lengkap dari nol, ikuti struktur `categories/create.blade.php` yang sudah ada sejak Pertemuan 3:
+File ini baru, belum pernah ada sebelumnya - tulis lengkap dari nol, ikuti struktur `categories/create.blade.php` yang sudah ada sejak Pertemuan 3:
 
 ```blade
 {{-- File: resources/views/categories/edit.blade.php --}}
@@ -453,7 +455,7 @@ File ini baru, belum pernah ada sebelumnya — tulis lengkap dari nol, ikuti str
 
 > 📸 *Screenshot: halaman `/categories` menampilkan data kategori yang benar-benar tersimpan di database, lengkap dengan navigasi pagination di bagian bawah tabel.*
 
-### Langkah 5 — Mengganti Data Dummy `BookController` dengan Eloquent
+### Langkah 5 - Mengganti Data Dummy `BookController` dengan Eloquent
 
 Pola yang sama diterapkan ke `BookController`. Dropdown kategori di form create/edit sekarang diisi dari `Category::all()`, bukan array kategori dummy:
 
@@ -531,7 +533,7 @@ public function destroy(string $id)
 }
 ```
 
-Aturan `exists:categories,id` ditambahkan di validasi `category_id`, baik di validasi inline `update()` di atas maupun di `StoreBookRequest` yang dipakai `store()` — supaya form tidak bisa menyimpan buku dengan `category_id` yang sebenarnya tidak ada di tabel `categories`. Buka `StoreBookRequest` yang sudah dibuat sejak Pertemuan 3, lalu ubah satu baris aturan `category_id`-nya:
+Aturan `exists:categories,id` ditambahkan di validasi `category_id`, baik di validasi inline `update()` di atas maupun di `StoreBookRequest` yang dipakai `store()` - supaya form tidak bisa menyimpan buku dengan `category_id` yang sebenarnya tidak ada di tabel `categories`. Buka `StoreBookRequest` yang sudah dibuat sejak Pertemuan 3, lalu ubah satu baris aturan `category_id`-nya:
 
 ```php
 // File: app/Http/Requests/StoreBookRequest.php (di method rules())
@@ -563,7 +565,7 @@ Di bagian bawah file, **hapus** paragraf catatan lama ("data di atas masih data 
 <p><em>Catatan: kolom kategori masih menampilkan ID. Menampilkan nama kategori memerlukan Eloquent Relationship, dipelajari di Pertemuan 7.</em></p>
 ```
 
-Lakukan perubahan yang sama di `books/show.blade.php` — baris "Kategori" diganti jadi "ID Kategori":
+Lakukan perubahan yang sama di `books/show.blade.php` - baris "Kategori" diganti jadi "ID Kategori":
 
 ```blade
 {{-- File: resources/views/books/show.blade.php (potongan) --}}
@@ -575,7 +577,7 @@ Lakukan perubahan yang sama di `books/show.blade.php` — baris "Kategori" digan
 
 > 📸 *Screenshot: halaman `/books` menampilkan data buku nyata dari database, kolom "ID Kategori" berisi angka (bukan nama), dan navigasi pagination di bawah tabel.*
 
-### Langkah 6 — Ujicoba
+### Langkah 6 - Ujicoba
 
 Jalankan server, lalu uji siklus CRUD penuh untuk kedua resource:
 
@@ -583,12 +585,12 @@ Jalankan server, lalu uji siklus CRUD penuh untuk kedua resource:
 php artisan serve
 ```
 
-1. Buka `/categories/create`, tambahkan kategori baru — pastikan redirect ke `/categories` dengan flash message sukses, dan data itu **masih ada** setelah halaman di-refresh manual (bukti data benar-benar tersimpan, bukan sekadar tampil dari hasil redirect).
+1. Buka `/categories/create`, tambahkan kategori baru - pastikan redirect ke `/categories` dengan flash message sukses, dan data itu **masih ada** setelah halaman di-refresh manual (bukti data benar-benar tersimpan, bukan sekadar tampil dari hasil redirect).
 2. Edit kategori yang baru dibuat lewat `/categories/{id}/edit`, ubah nama atau deskripsinya, submit, dan pastikan perubahan tersimpan.
 3. Buka `/books/create`, pastikan dropdown "Kategori" berisi kategori yang benar-benar ada di database (bukan lagi tiga kategori dummy hardcoded). Tambahkan satu buku.
-4. Buka detail buku (`/books/{id}`) dan halaman edit (`/books/{id}/edit`) — pastikan data yang ditampilkan/di-prefill sesuai dengan yang baru disimpan, termasuk kategori yang otomatis terpilih (`selected`) di dropdown.
+4. Buka detail buku (`/books/{id}`) dan halaman edit (`/books/{id}/edit`) - pastikan data yang ditampilkan/di-prefill sesuai dengan yang baru disimpan, termasuk kategori yang otomatis terpilih (`selected`) di dropdown.
 5. Hapus buku itu lewat tombol "Hapus" di halaman index, pastikan baris itu hilang dan flash message tampil.
-6. Coba submit form `/books/create` dalam keadaan kosong — pastikan semua pesan error validasi tetap tampil seperti sebelumnya (validasi tidak berubah, hanya sumber datanya).
+6. Coba submit form `/books/create` dalam keadaan kosong - pastikan semua pesan error validasi tetap tampil seperti sebelumnya (validasi tidak berubah, hanya sumber datanya).
 
 ---
 
@@ -608,7 +610,7 @@ Lengkapi CRUD `members` mengikuti pola persis yang baru dikerjakan untuk `catego
 
 1. Buat `resources/views/members/create.blade.php`, `edit.blade.php`, dan `show.blade.php`, mengikuti struktur form yang sama seperti `categories/create.blade.php`/`edit.blade.php` (sesuaikan field: `nama`, `nim`, `email`, `nomor_telepon`, `alamat`, `status`).
 2. Buat `StoreMemberRequest` (`php artisan make:request StoreMemberRequest`) dengan validasi: `nama` wajib, `nim` wajib dan unik, `email` wajib format email dan unik, `nomor_telepon` wajib, `alamat` wajib, `status` wajib salah satu dari `aktif`/`nonaktif`.
-3. Isi seluruh method `MemberController` (`create`, `store`, `show`, `edit`, `update`, `destroy`) memakai `Member::create()`, `findOrFail()`, `update()`, `delete()` — ganti juga `index()` dari array dummy ke `Member::paginate(10)`.
+3. Isi seluruh method `MemberController` (`create`, `store`, `show`, `edit`, `update`, `destroy`) memakai `Member::create()`, `findOrFail()`, `update()`, `delete()` - ganti juga `index()` dari array dummy ke `Member::paginate(10)`.
 4. Tambahkan fitur **search nama anggota** di halaman `/members`: input teks di atas tabel yang mengirim `GET` dengan parameter `?search=`, lalu di `MemberController@index` tambahkan `Member::when(request('search'), fn ($query, $search) => $query->where('nama', 'like', "%{$search}%"))->paginate(10)`. Pastikan hasil pencarian tetap mempertahankan parameter `search` saat berpindah halaman pagination (`{{ $members->appends(request()->query())->links() }}`).
 
 **Yang dikumpulkan:**
@@ -616,5 +618,7 @@ Lengkapi CRUD `members` mengikuti pola persis yang baru dikerjakan untuk `catego
 - Screenshot `/members` menampilkan data nyata dari database beserta hasil pencarian nama anggota
 
 ---
+
+</div>
 
 *Navigasi: [← Pertemuan sebelumnya](./pertemuan-04.md) | [Daftar Isi](./README.md) | [Pertemuan berikutnya →](./pertemuan-06.md)*
