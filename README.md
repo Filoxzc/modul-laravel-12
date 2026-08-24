@@ -1,5 +1,7 @@
 # Modul Ajar Pemrograman Framework — Laravel 12
 
+<div style="text-align: justify;">
+
 Selamat datang di modul ajar Pemrograman Framework menggunakan Laravel 12.
 
 ## Persiapan Sebelum Memulai
@@ -62,3 +64,38 @@ Beberapa fitur akhir yang akan terbentuk bertahap sepanjang semester:
 - Dashboard statistik & halaman laporan
 
 Project ini dibangun bertahap, bukan sekaligus — jadi wajar kalau di pertemuan awal sebagian fitur di atas belum ada. Sebelum mulai mengerjakan pertemuan manapun (terutama Pertemuan 1 dan Pertemuan 5), baca dulu **[Studi Kasus & Desain Database](./studi-kasus-database.md)** untuk gambaran lengkap aktor, desain tabel, dan relasi antar tabelnya.
+
+## Cara Mengakses Modul Ini
+
+Repository modul ini ada di GitHub: `civeryoshioka/modul-laravel-12`. Ada tiga cara untuk membuka dan membaca modul ini di komputermu, khususnya lewat VS Code. Pilih salah satu sesuai kebutuhan dan kenyamananmu.
+
+### 1. Unduh ZIP
+
+Buka repository di GitHub → tombol hijau **Code** → **Download ZIP**, lalu ekstrak dan buka foldernya di VS Code.
+
+- **Kelebihan:** Paling sederhana, tidak perlu instal Git atau paham perintahnya sama sekali. Langsung dapat semua file modul.
+- **Kekurangan:** Kalau ada update/perbaikan modul di kemudian hari, kamu harus unduh ulang manual dan tidak ada riwayat perubahan (history). Tidak cocok kalau modul ini juga jadi tempat kamu menyimpan progres tugas lewat Git, karena folder hasil ekstrak ZIP bukan repository Git.
+
+### 2. Clone via Git
+
+Buka terminal, jalankan:
+
+```bash
+git clone https://github.com/civeryoshioka/modul-laravel-12.git
+```
+
+lalu buka folder hasil clone-nya di VS Code (`code modul-laravel-12`).
+
+- **Kelebihan:** Bisa update modul kapan saja cukup dengan `git pull` tanpa unduh ulang. Sekalian jadi latihan Git sejak awal (relevan karena Git wajib dipakai sejak Pertemuan 1). Riwayat perubahan modul bisa dilihat lewat `git log`.
+- **Kekurangan:** Wajib sudah instal Git dan familiar perintah dasarnya. Kalau salah perintah (misalnya push tanpa sadar ke repo modul), berpotensi bikin bingung — sebaiknya clone modul ini terpisah dari repository tugas pribadi (`app-perpustakaan`).
+
+### 3. Baca Langsung di GitHub
+
+Buka file `.md` langsung di halaman GitHub lewat browser, tanpa mengunduh apa pun.
+
+- **Kelebihan:** Paling cepat untuk sekadar membaca atau mengecek sesuatu, tidak butuh setup apa pun, bisa dari HP sekalipun.
+- **Kekurangan:** Tidak praktis untuk belajar sambil praktik coding, karena kamu harus bolak-balik antara browser dan VS Code. Tidak ada modul tersimpan secara lokal untuk dibaca offline.
+
+**Rekomendasi:** kalau kamu sudah wajib pakai Git sejak Pertemuan 1, sekalian saja **clone** modul ini — jadi latihan Git tambahan dan memudahkan update di pertemuan-pertemuan berikutnya. Kalau belum siap dengan Git sama sekali, **unduh ZIP** dulu tidak masalah, sambil pelan-pelan belajar Git dari materi [Git & GitHub — Dasar yang Perlu Diketahui](./tambahan/git-github-dasar.md).
+
+</div>
