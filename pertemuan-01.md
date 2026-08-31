@@ -228,6 +228,11 @@ Setelah menyelesaikan praktikum, kerjakan secara mandiri:
 
 ---
 
+### Pengerjaan Tugas Pertemuan 1
+- **Nama**: [filo mahabah dienulloh]
+- **NRP**: 3125500058
+- **Kelas**: [d3 it b]
+
 </div>
 
 *Navigasi: [Daftar Isi](./README.md) | [Pertemuan berikutnya →](./pertemuan-02.md)*
