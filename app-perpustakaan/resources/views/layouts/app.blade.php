@@ -18,6 +18,22 @@
         .btn { display: inline-block; padding: 6px 14px; background: #2563eb; color: #fff; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; }
         form.inline { display: inline; }
         footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb; margin-top: 40px; }
+        
+        /* Form styling */
+        form label { display: block; margin-top: 14px; font-weight: bold; }
+        form input[type="text"], 
+        form input[type="number"], 
+        form input[type="email"], 
+        form select, 
+        form textarea { 
+            width: 100%; 
+            padding: 8px 10px; 
+            margin-top: 4px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            display: block;
+        }
+        .error { color: #b91c1c; font-size: 13px; margin-top: 4px; }
     </style>
 </head>
 <body>
