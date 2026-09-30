@@ -9,11 +9,11 @@ use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
-    public function index()
-    {
-        $books = Book::paginate(10);
-        return view('books.index', compact('books'));
-    }
+   public function index()
+{
+    $books = Book::with('category')->paginate(10);
+    return view('books.index', compact('books'));
+}
 
     public function create()
     {
@@ -30,11 +30,11 @@ class BookController extends Controller
             ->with('success', "Buku \"{$validated['judul']}\" berhasil ditambahkan.");
     }
 
-    public function show(string $id)
-    {
-        $book = Book::findOrFail($id);
-        return view('books.show', compact('book'));
-    }
+   public function show(string $id)
+{
+    $book = Book::with('category')->findOrFail($id);
+    return view('books.show', compact('book'));
+}
 
     public function edit(string $id)
     {

@@ -22,6 +22,12 @@
         label { display: block; margin-top: 14px; font-weight: bold; }
         input[type="text"], input[type="number"], input[type="email"], select, textarea { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; border-radius: 4px; }
         .error { color: #b91c1c; font-size: 13px; margin-top: 4px; }
+        /* Badge status tugas praktikum */
+.badge { display: inline-block; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: bold; text-transform: capitalize; }
+.badge-dipinjam { background-color: #fef3c7; color: #b45309; }
+.badge-dikembalikan { background-color: #d1fae5; color: #065f46; }
+.badge-terlambat { background-color: #fee2e2; color: #b91c1c; }
+.btn-sm { padding: 4px 8px; font-size: 12px; }
     </style>
 </head>
 <body>

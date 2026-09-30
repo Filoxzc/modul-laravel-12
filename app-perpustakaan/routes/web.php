@@ -10,6 +10,11 @@ Route::get('/', function () {
     return redirect()->route('books.index');
 });
 
+// Route untuk Tugas: tombol Kembalikan Buku
+Route::patch('/loans/{id}/kembalikan', [LoanController::class, 'kembalikan'])->name('loans.kembalikan');
+
+// Route resource standar untuk Loans
+Route::resource('loans', LoanController::class);
 Route::resource('books', BookController::class);
 Route::resource('categories', CategoryController::class)->except(['show']);
 Route::resource('members', MemberController::class);
