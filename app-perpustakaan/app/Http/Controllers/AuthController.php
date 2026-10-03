@@ -42,7 +42,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')
-            ->with('success', 'Logout berhasil.');
+        return redirect()->intended(route('dashboard'))
+    ->with('success', 'Login berhasil, selamat datang ' . Auth::user()->name . '.');
     }
 }
